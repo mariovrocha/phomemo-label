@@ -1,0 +1,36 @@
+"use client";
+
+import * as React from "react";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Tick02Icon } from "@hugeicons/core-free-icons";
+import { cn } from "@/app/lib/utils";
+
+interface CheckboxProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  checked?: boolean;
+  onCheckedChange?: (checked: boolean) => void;
+}
+
+const Checkbox = React.forwardRef<HTMLButtonElement, CheckboxProps>(
+  ({ className, checked = false, onCheckedChange, ...props }, ref) => {
+    return (
+      <button
+        ref={ref}
+        role="checkbox"
+        aria-checked={checked}
+        type="button"
+        onClick={() => onCheckedChange?.(!checked)}
+        className={cn(
+          "peer h-5 w-5 shrink-0 rounded-md border border-gray-300 shadow-xs focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary-100 disabled:cursor-not-allowed disabled:opacity-50",
+          checked && "bg-primary-600 border-primary-600 text-white",
+          className
+        )}
+        {...props}
+      >
+        {checked && <HugeiconsIcon icon={Tick02Icon} size={14} className="mx-auto" />}
+      </button>
+    );
+  }
+);
+Checkbox.displayName = "Checkbox";
+
+export { Checkbox };
