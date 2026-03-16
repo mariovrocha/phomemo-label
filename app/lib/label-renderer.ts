@@ -48,26 +48,50 @@ export async function renderLabel(
     ctx.drawImage(qrCanvas, padding, padding, qrSize, qrSize);
   }
 
-  // Draw two text lines on the right of the QR code
+  // Text area to the right of QR code
   const textX = padding + qrSize + 8;
   const textAreaWidth = LABEL_WIDTH_PX - textX - padding;
   const textAreaHeight = LABEL_HEIGHT_PX - padding * 2;
+  const textCenterY = padding + textAreaHeight / 2;
 
   ctx.fillStyle = "black";
-  ctx.textBaseline = "top";
 
   // Auto-size fonts to fit
-  const line1FontSize = fitFontSize(ctx, text1, textAreaWidth, textAreaHeight * 0.55, "bold");
-  const line2FontSize = fitFontSize(ctx, text2, textAreaWidth, textAreaHeight * 0.40, "normal");
+  const line1FontSize = fitFontSize(ctx, text1, textAreaWidth, textAreaHeight * 0.38, "bold");
+  const line2FontSize = fitFontSize(ctx, text2, textAreaWidth, textAreaHeight * 0.20, "normal");
 
-  // Draw text1 (top, bold)
+  // Measure actual text heights
   ctx.font = `bold ${line1FontSize}px Arial, sans-serif`;
-  ctx.fillText(text1, textX, padding + 2, textAreaWidth);
+  const m1 = ctx.measureText(text1);
+  const h1 = text1 ? m1.actualBoundingBoxAscent + m1.actualBoundingBoxDescent : 0;
 
-  // Draw text2 (bottom, normal)
   ctx.font = `${line2FontSize}px Arial, sans-serif`;
-  const line2Y = padding + textAreaHeight * 0.58;
-  ctx.fillText(text2, textX, line2Y, textAreaWidth);
+  const m2 = ctx.measureText(text2);
+  const h2 = text2 ? m2.actualBoundingBoxAscent + m2.actualBoundingBoxDescent : 0;
+
+  const gap = text1 && text2 ? 3 : 0;
+  const totalHeight = h1 + gap + h2;
+
+  // Center the text block vertically, and each line horizontally
+  const blockTop = textCenterY - totalHeight / 2;
+
+  // Draw text1 (top, bold, centered)
+  if (text1) {
+    ctx.font = `bold ${line1FontSize}px Arial, sans-serif`;
+    ctx.textBaseline = "top";
+    const w1 = ctx.measureText(text1).width;
+    const x1 = textX + (textAreaWidth - Math.min(w1, textAreaWidth)) / 2;
+    ctx.fillText(text1, x1, blockTop, textAreaWidth);
+  }
+
+  // Draw text2 (below text1, normal, centered)
+  if (text2) {
+    ctx.font = `${line2FontSize}px Arial, sans-serif`;
+    ctx.textBaseline = "top";
+    const w2 = ctx.measureText(text2).width;
+    const x2 = textX + (textAreaWidth - Math.min(w2, textAreaWidth)) / 2;
+    ctx.fillText(text2, x2, blockTop + h1 + gap, textAreaWidth);
+  }
 
   const imageData = ctx.getImageData(0, 0, LABEL_WIDTH_PX, LABEL_HEIGHT_PX);
 
